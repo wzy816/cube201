@@ -17,6 +17,7 @@ using namespace std;
 /**
  * number of moves
  * 6 faces * 3 twists 
+ * U1,U2,U3,R1,R2,R3,D1,D2,D3,B1,Bi,B3,L1,L2,L3
  */
 const int NMOVES = 18;
 
@@ -45,28 +46,23 @@ const int M = 48;
  */
 const int CUBIES = 24;
 
-extern const class cubepos identity_cube; // solved cube
-
-/*30:*/
-#line 622 "cubepos.w"
+/**
+ * solved cube
+ */
+extern const class cubepos identity_cube;
 
 typedef vector<int> moveseq;
 
-/*:30*//*64:*/
-#line 1310 "cubepos.w"
 
 const int ALLMOVEMASK = (1 << NMOVES) - 1;
 const int ALLMOVEMASK_EXT = (1 << NMOVES) - 1;
 
-/*:64*//*70:*/
-#line 1444 "cubepos.w"
-
 const int CANONSEQSTATES = FACES + 1;
 const int CANONSEQSTART = 0;
 
-/*:70*//*75:*/
-#line 1496 "cubepos.w"
-
+/**
+ * util
+ */
 void error(const char *s);
 inline double myrand() { return drand48(); }
 inline int random_move() { return (int) (NMOVES*myrand()); }
@@ -74,8 +70,6 @@ inline int random_move_ext() { return (int) (NMOVES*myrand()); }
 double walltime();
 double duration();
 
-/*:75*/
-#line 71 "cubepos.w"
 
 class cubepos {
  public:
@@ -167,34 +161,26 @@ class cubepos {
   inline cubepos(const cubepos &cp = identity_cube) { *this = cp; }
   cubepos(int, int, int);
 
-/*:15*//*20:*/
-#line 392 "cubepos.w"
-
   void move(int mov);
 
-/*:20*//*31:*/
-#line 631 "cubepos.w"
-
   static int invert_move(int mv) { return inv_move[mv]; }
-  static moveseq invert_sequence(const moveseq &sequence);
-  void invert_into(cubepos &dst) const;
 
-/*:31*//*37:*/
-#line 742 "cubepos.w"
+  static moveseq invert_sequence(const moveseq &sequence);
+
+  void invert_into(cubepos &dst) const;
 
   void movepc(int mov);
 
-/*:37*//*41:*/
-#line 835 "cubepos.w"
-
   static void mul(const cubepos &a, const cubepos &b, cubepos &r);
+
   inline static void mulpc(const cubepos &a, const cubepos &b, cubepos &r) {
     mul(b, a, r);
   }
 
-/*:41*//*43:*/
-#line 862 "cubepos.w"
 
+  /**
+   * parsing and printing
+   */
   static void skip_whitespace(const char *&p);
   static int parse_face(const char *&p);
   static int parse_face(char f);
@@ -205,63 +191,46 @@ class cubepos {
   static void append_moveseq(char *&p, const moveseq &seq);
   static char *moveseq_string(const moveseq &seq);
 
-/*:43*//*52:*/
-#line 1063 "cubepos.w"
 
+  /**
+   * read and write of singmaster notation
+   */
   const char *parse_Singmaster(const char *p);
   char *Singmaster_string() const;
-
-/*:52*//*63:*/
-#line 1302 "cubepos.w"
 
   void remap_into(int m, cubepos &dst) const;
   void canon_into48(cubepos &dst) const;
   void canon_into48_aux(cubepos &dst) const;
   void canon_into96(cubepos &dst) const;
 
-/*:63*//*67:*/
-#line 1373 "cubepos.w"
-
   void randomize();
 
-/*:67*//*74:*/
-#line 1487 "cubepos.w"
-
-  static inline int next_cs(int cs, int mv) { return canon_seq[cs][mv]; }
-  static inline int cs_mask(int cs) { return canon_seq_mask[cs]; }
-  static inline int cs_mask_ext(int cs) { return canon_seq_mask_ext[cs]; }
 
   static char faces[FACES];
 
   static unsigned char edge_trans[NMOVES][CUBIES],
       corner_trans[NMOVES][CUBIES];
 
-/*:21*//*32:*/
-#line 638 "cubepos.w"
-
   static unsigned char inv_move[NMOVES];
-
-/*:32*//*55:*/
-#line 1180 "cubepos.w"
 
   static unsigned char face_map[M][FACES], move_map[M][NMOVES];
   static unsigned char invm[M], mm[M][M];
   static unsigned char rot_edge[M][CUBIES], rot_corner[M][CUBIES];
 
-/*:55*//*71:*/
-#line 1451 "cubepos.w"
-
+  /**
+   * canon
+   */
   static unsigned char canon_seq[CANONSEQSTATES][NMOVES];
   static int canon_seq_mask[CANONSEQSTATES];
   static int canon_seq_mask_ext[CANONSEQSTATES];
 
-
-/*:8*/
-#line 76 "cubepos.w"
-
+  /**
+   * canon seq util
+   */
+  static inline int next_cs(int cs, int mv) { return canon_seq[cs][mv]; }
+  static inline int cs_mask(int cs) { return canon_seq_mask[cs]; }
+  static inline int cs_mask_ext(int cs) { return canon_seq_mask_ext[cs]; }
 };
-/*16:*/
-#line 318 "cubepos.w"
 
 static cubepos cubepos_initialization_hack(1, 2, 3);
 

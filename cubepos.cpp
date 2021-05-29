@@ -8,7 +8,8 @@
 const cubepos identity_cube(0, 0, 0);
 unsigned char cubepos::corner_ori_inc[CUBIES],
     cubepos::corner_ori_dec[CUBIES],
-    cubepos::corner_ori_neg_strip[CUBIES], cubepos::mod24[2*CUBIES];
+    cubepos::corner_ori_neg_strip[CUBIES],
+    cubepos::mod24[2*CUBIES];
 
 /**
  * face labeling (0 to 5)
@@ -74,25 +75,26 @@ static const unsigned char corner_change[FACES][4] = {
     {1, 2, 1, 2},
 };
 
-/*:27*//*33:*/
-#line 643 "cubepos.w"
 
 unsigned char cubepos::inv_move[NMOVES];
 
-/*:33*//*44:*/
-#line 877 "cubepos.w"
-
+/**
+ * result buf
+ */
 static char static_buf[200];
 
-/*:44*//*47:*/
-#line 959 "cubepos.w"
 
+/**
+ * solved cube in Singmaster notation with orientation
+ */ 
 static const char *sing_solved =
     "UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR";
 
-/*:47*//*48:*/
-#line 972 "cubepos.w"
 
+/**
+ * edge and corner cubies
+ * no orientation convention here 
+ */
 static const char *const smedges[] = {
     "UB", "BU", "UL", "LU", "UR", "RU", "UF", "FU",
     "LB", "BL", "RB", "BR", "LF", "FL", "RF", "FR",
@@ -107,18 +109,12 @@ static const char *const smcorners[] = {
     "BUL", "RUB", "LUF", "FUR", "LDB", "BDR", "FDL", "RDF",
 };
 
-/*:48*//*49:*/
-#line 995 "cubepos.w"
-
 const int INVALID = 99;
 static unsigned char lookup_edge_cubie[FACES*FACES];
 static unsigned char lookup_corner_cubie[FACES*FACES*FACES];
 static unsigned char sm_corner_order[8];
 static unsigned char sm_edge_order[12];
 static unsigned char sm_edge_flipped[12];
-
-/*:49*//*56:*/
-#line 1187 "cubepos.w"
 
 unsigned char cubepos::face_map[M][FACES], cubepos::move_map[M][NMOVES];
 unsigned char cubepos::mm[M][M], cubepos::invm[M];
@@ -139,26 +135,27 @@ unsigned char cubepos::canon_seq[CANONSEQSTATES][NMOVES];
 int cubepos::canon_seq_mask[CANONSEQSTATES];
 int cubepos::canon_seq_mask_ext[CANONSEQSTATES];
 
-/*:72*/
-#line 255 "cubepos.w"
-
-/*36:*/
-#line 707 "cubepos.w"
-
+/**
+ * two kinds of representation of a cube
+ * 1,for each corner and edge cubie, indicates what slot it is in and what orientation it has in that slot
+ * 2.for each slot, what cubie is in the slot and what orientation it 
+ * 
+ * convert from 1 (default) to 2
+ */ 
 void cubepos::invert_into(cubepos &dst) const {
   for (int i = 0; i < 8; i++) {
     int cval = c[i];
-    dst.c[corner_perm(cval)] = corner_ori_sub(i, cval);
+    dst.c[corner_perm(cval)] = corner_ori_sub(i, cval); // ?
   }
   for (int i = 0; i < 12; i++) {
     int cval = e[i];
-    dst.e[edge_perm(cval)] = edge_val(i, edge_ori(cval));
+    dst.e[edge_perm(cval)] = edge_val(i, edge_ori(cval)); // ?
   }
 }
 
-/*:36*//*50:*/
-#line 1007 "cubepos.w"
-
+/**
+ * parse cubie to base-6 number 
+ */
 static int parse_cubie(const char *&p) {
   cubepos::skip_whitespace(p);
   int v = 1;
@@ -170,6 +167,10 @@ static int parse_cubie(const char *&p) {
   }
   return v;
 }
+
+/**
+ * parse edge to base-6 number 
+ */
 static int parse_edge(const char *&p) {
   int c = parse_cubie(p);
   if (c < 6*6 || c >= 2*6*6)
@@ -179,6 +180,10 @@ static int parse_edge(const char *&p) {
     return -1;
   return c;
 }
+
+/**
+ * parse corner to base-6 number 
+ */
 static int parse_corner(const char *&p) {
   int c = parse_cubie(p);
   if (c < 6*6*6 || c >= 2*6*6*6)
@@ -189,9 +194,10 @@ static int parse_corner(const char *&p) {
   return c;
 }
 
-/*:50*//*53:*/
-#line 1074 "cubepos.w"
 
+/**
+ * parse cube position from singmaster notation
+ */
 const char *cubepos::parse_Singmaster(const char *p) {
   if (strncmp(p, "SING ", 5)==0)
     p += 5;
@@ -218,9 +224,9 @@ const char *cubepos::parse_Singmaster(const char *p) {
   return 0;
 }
 
-/*:53*//*58:*/
-#line 1212 "cubepos.w"
-
+/**
+ * given a corner, fill out a face map entity 
+ */
 static void parse_corner_to_facemap(const char *p, unsigned char *a) {
   for (int i = 0; i < 3; i++) {
     int f = cubepos::parse_face(p[i]);
@@ -229,9 +235,9 @@ static void parse_corner_to_facemap(const char *p, unsigned char *a) {
   }
 }
 
-/*:58*//*59:*/
-#line 1224 "cubepos.w"
-
+/**
+ * permutation multiplication for a face map 
+ */
 static void face_map_multiply(unsigned char *a, unsigned char *b,
                               unsigned char *c) {
   for (int i = 0; i < 6; i++)
@@ -248,9 +254,7 @@ void cubepos::init() {
     return;
   initialized = 1;
 
-  /**
-   * init of corner orientation array
-   */
+  // init of corner orientation array
   for (int i = 0; i < CUBIES; i++) {
     int perm = corner_perm(i);
     int ori = corner_ori(i);
@@ -260,30 +264,28 @@ void cubepos::init() {
     mod24[i] = mod24[i + CUBIES] = i;
   }
 
-  /**
-  * init of trans array
-  */
+  // init of trans array
   for (int m = 0; m < NMOVES; m++)
     for (int c = 0; c < CUBIES; c++) {
       edge_trans[m][c] = c;
       corner_trans[m][c] = c;
     }
 
-  /**
-   * update trans array
-   */
+  // update trans array
   for (int f = 0; f < FACES; f++)
     for (int t = 0; t < TWISTS; t++) {
-      int m = f*TWISTS + t;
+      int m = f*TWISTS + t; // index of move
       int isquarter = (t==0 || t==2);
       int perminc = t + 1; // perm increased by twist, clockwise inc 1, half turn inc 2, counter inc 3
 
       for (int i = 0; i < 4; i++) { // i=cubie index of cur face
         int ii = (i + perminc)%4;
+        
         for (int o = 0; o < 2; o++) {
-          int oo = o; // new orientation 
+          int oo = o;
           if (isquarter)
             oo ^= edge_change[f];
+          // ?
           edge_trans[m][edge_val(edge_twist_perm[f][i], o)] =
               edge_val(edge_twist_perm[f][ii], oo);
         }
@@ -291,21 +293,19 @@ void cubepos::init() {
           int oo = o;
           if (isquarter)
             oo = (corner_change[f][i] + oo)%3;
+          // ?
           corner_trans[m][corner_val(corner_twist_perm[f][i], o)] =
               corner_val(corner_twist_perm[f][ii], oo);
         }
       }
     }
 
-/*:29*//*34:*/
-#line 649 "cubepos.w"
-
+  // init inv_move array
+  // inv_move = 2,1,0,5,4,3,8,7,6,11,10,9,14,13,12,17,16,15
   for (int i = 0; i < NMOVES; i++)
     inv_move[i] = TWISTS*(i/TWISTS) + (NMOVES - i - 1)%TWISTS;
 
-/*:34*//*51:*/
-#line 1040 "cubepos.w"
-
+  // init lookup
   memset(lookup_edge_cubie, INVALID, sizeof(lookup_edge_cubie));
   memset(lookup_corner_cubie, INVALID, sizeof(lookup_corner_cubie));
   for (int i = 0; i < CUBIES; i++) {
@@ -320,12 +320,11 @@ void cubepos::init() {
     sm_edge_order[i] = edge_perm(cv);
     sm_edge_flipped[i] = edge_ori(cv);
   }
-  for (int i = 0; i < 8; i++)
+  for (int i = 0; i < 8; i++){
     sm_corner_order[i] = corner_perm(parse_corner(p));
+  }
 
-/*:51*//*60:*/
-#line 1238 "cubepos.w"
-
+  // init face map
   unsigned char face_to_m[FACES*FACES*FACES];
   for (int i = 0; i < 6; i++)
     parse_corner_to_facemap(axis_permute_map[i], face_map[8*i]);
@@ -335,13 +334,12 @@ void cubepos::init() {
     for (int j = 1; j < 8; j++)
       face_map_multiply(face_map[8*i], face_map[j], face_map[8*i + j]);
 
-/*:60*//*61:*/
-#line 1251 "cubepos.w"
-
   for (int i = 0; i < M; i++) {
     int v = face_map[i][0]*36 + face_map[i][1]*6 + face_map[i][2];
     face_to_m[v] = i;
   }
+
+  // init move map
   unsigned char tfaces[6];
   for (int i = 0; i < M; i++)
     for (int j = 0; j < M; j++) {
@@ -363,9 +361,7 @@ void cubepos::init() {
     }
   }
 
-/*:61*//*62:*/
-#line 1281 "cubepos.w"
-
+  // init rot
   for (int m = 0; m < M; m++)
     for (int c = 0; c < CUBIES; c++) {
       int v = 0;
@@ -378,9 +374,7 @@ void cubepos::init() {
       rot_corner[m][c] = mod24[lookup_corner_cubie[v]];
     }
 
-/*:62*//*73:*/
-#line 1467 "cubepos.w"
-
+  // init canon
   for (int s = 0; s < CANONSEQSTATES; s++) {
     int prevface = (s - 1)%FACES;
     canon_seq_mask[s] = (1 << NMOVES) - 1;
@@ -411,7 +405,8 @@ cubepos::cubepos(int, int, int) {
 }
 
 /**
- * apply the move
+ * perform the move
+ * update c and e according to corner_trans and edge_trans
  */
 void cubepos::move(int mov) {
   const unsigned char *p = corner_trans[mov];
@@ -438,9 +433,10 @@ void cubepos::move(int mov) {
   e[11] = p[e[11]];
 }
 
-/*:23*//*35:*/
-#line 658 "cubepos.w"
-
+/**
+ * invert a move seq
+ * by invert every move
+ */
 moveseq cubepos::invert_sequence(const moveseq &seq) {
   unsigned int len = seq.size();
   moveseq r(len);
@@ -449,86 +445,102 @@ moveseq cubepos::invert_sequence(const moveseq &seq) {
   return r;
 }
 
-/*:35*//*38:*/
-#line 761 "cubepos.w"
-
+/**
+ * swap macro
+ */
 #define ROT2(cc, a, b) {unsigned char t= cc[a];cc[a]= cc[b];cc[b]= t;}
 #define ROT4(cc, a, b, c, d) {unsigned char t= cc[d];cc[d]= cc[c];cc[c]= cc[b]; cc[b]= cc[a];cc[a]= t;}
 #define ROT22(cc, a, b, c, d) ROT2(cc,a,c) ROT2(cc,b,d)
-
-/*:38*//*39:*/
-#line 773 "cubepos.w"
 
 #define EDGE4FLIP(a, b, c, d) {unsigned char t= e[d];e[d]= edge_flip(e[c]);\
          e[c]= edge_flip(e[b]); e[b]= edge_flip(e[a]);e[a]= edge_flip(t);}
 #define CORNER4FLIP(a, b, cc, d) {unsigned char t= c[d];c[d]= corner_ori_inc[c[cc]];\
  c[cc]= corner_ori_dec[c[b]];c[b]= corner_ori_inc[c[a]];c[a]= corner_ori_dec[t];}
 
-/*:39*//*40:*/
-#line 788 "cubepos.w"
 
+/**
+ * a move routine that treats the representation as a slot (position) to cubie map  
+ */
 void cubepos::movepc(int mov) {
   switch (mov) {
+    // U1
     case 0: ROT4(e, 0, 2, 3, 1);
       ROT4(c, 0, 1, 3, 2);
       break;
+    // U2
     case 1: ROT22(e, 0, 2, 3, 1);
       ROT22(c, 0, 1, 3, 2);
       break;
+    // U3
     case 2: ROT4(e, 1, 3, 2, 0);
       ROT4(c, 2, 3, 1, 0);
       break;
+    // F1
     case 3: ROT4(e, 3, 7, 11, 6);
       CORNER4FLIP(3, 7, 6, 2);
       break;
+    // F2
     case 4: ROT22(e, 3, 7, 11, 6);
       ROT22(c, 2, 3, 7, 6);
       break;
+    // F3
     case 5: ROT4(e, 6, 11, 7, 3);
       CORNER4FLIP(3, 2, 6, 7);
       break;
+    // R1
     case 6: EDGE4FLIP(2, 5, 10, 7);
       CORNER4FLIP(1, 5, 7, 3);
       break;
+    // R2
     case 7: ROT22(e, 2, 5, 10, 7);
       ROT22(c, 3, 1, 5, 7);
       break;
+    // R3
     case 8: EDGE4FLIP(7, 10, 5, 2);
       CORNER4FLIP(1, 3, 7, 5);
       break;
+    // D1
     case 9: ROT4(e, 9, 11, 10, 8);
       ROT4(c, 4, 6, 7, 5);
       break;
+    // D2
     case 10: ROT22(e, 9, 11, 10, 8);
       ROT22(c, 4, 6, 7, 5);
       break;
+    // D3
     case 11: ROT4(e, 8, 10, 11, 9);
       ROT4(c, 5, 7, 6, 4);
       break;
+    // B1
     case 12: ROT4(e, 0, 4, 8, 5);
       CORNER4FLIP(0, 4, 5, 1);
       break;
+    // B2
     case 13: ROT22(e, 0, 4, 8, 5);
       ROT22(c, 1, 0, 4, 5);
       break;
+    // B3
     case 14: ROT4(e, 5, 8, 4, 0);
       CORNER4FLIP(0, 1, 5, 4);
       break;
+    // L1
     case 15: EDGE4FLIP(1, 6, 9, 4);
       CORNER4FLIP(2, 6, 4, 0);
       break;
+    // L2
     case 16: ROT22(e, 1, 6, 9, 4);
       ROT22(c, 0, 2, 6, 4);
       break;
+    // L3
     case 17: EDGE4FLIP(4, 9, 6, 1);
       CORNER4FLIP(2, 0, 4, 6);
       break;
   }
 }
 
-/*:40*//*42:*/
-#line 845 "cubepos.w"
-
+/**
+ * multiplication routine
+ */
 void cubepos::mul(const cubepos &a, const cubepos &b, cubepos &r) {
   for (int i = 0; i < 8; i++) {
     int cc = a.c[i];
@@ -540,19 +552,21 @@ void cubepos::mul(const cubepos &a, const cubepos &b, cubepos &r) {
   }
 }
 
-/*:42*//*45:*/
-#line 882 "cubepos.w"
-
+/**
+ * parsing and printing
+ */
 void cubepos::skip_whitespace(const char *&p) {
   while (*p && *p <= ' ')
     p++;
 }
+
 int cubepos::parse_face(const char *&p) {
   int f = parse_face(*p);
   if (f >= 0)
     p++;
   return f;
 }
+
 int cubepos::parse_face(char f) {
   switch (f) {
     case 'u':
@@ -570,6 +584,7 @@ int cubepos::parse_face(char f) {
     default:return -1;
   }
 }
+
 int cubepos::parse_move(const char *&p) {
   skip_whitespace(p);
   const char *q = p;
@@ -596,14 +611,12 @@ int cubepos::parse_move(const char *&p) {
   return f*TWISTS + t;
 }
 
-/*:45*//*46:*/
-#line 925 "cubepos.w"
-
 void cubepos::append_move(char *&p, int mv) {
   append_face(p, mv/TWISTS);
   *p++ = "123"[mv%TWISTS];
   *p = 0;
 }
+
 moveseq cubepos::parse_moveseq(const char *&p) {
   moveseq r;
   int mv;
@@ -611,11 +624,13 @@ moveseq cubepos::parse_moveseq(const char *&p) {
     r.push_back(mv);
   return r;
 }
+
 void cubepos::append_moveseq(char *&p, const moveseq &seq) {
   *p = 0;
   for (unsigned int i = 0; i < seq.size(); i++)
     append_move(p, seq[i]);
 }
+
 char *cubepos::moveseq_string(const moveseq &seq) {
   if (seq.size() > 65)
     error("! can't print a move sequence that long");
@@ -624,9 +639,10 @@ char *cubepos::moveseq_string(const moveseq &seq) {
   return static_buf;
 }
 
-/*:46*//*54:*/
-#line 1106 "cubepos.w"
 
+/**
+ * write a position in singmaster notation 
+ */
 char *cubepos::Singmaster_string() const {
   cubepos cp;
   invert_into(cp);
@@ -651,9 +667,11 @@ char *cubepos::Singmaster_string() const {
   return static_buf;
 }
 
-/*:54*//*65:*/
-#line 1316 "cubepos.w"
 
+/**
+ * remaps a position p according to mpm'
+ * passing in the destination by reference
+ */
 void cubepos::remap_into(int m, cubepos &dst) const {
   int mprime = invm[m];
   for (int i = 0; i < 8; i++) {
@@ -668,9 +686,10 @@ void cubepos::remap_into(int m, cubepos &dst) const {
   }
 }
 
-/*:65*//*66:*/
-#line 1335 "cubepos.w"
-
+/**
+ * auxilliary func for canon_into48
+ * call routine 48 times and find the least
+ */
 void cubepos::canon_into48_aux(cubepos &dst) const {
   for (int m = 1; m < M; m++) {
     int mprime = invm[m];
@@ -698,14 +717,18 @@ void cubepos::canon_into48_aux(cubepos &dst) const {
     nextm:;
   }
 }
+
+/**
+ * calculates the canonical (first, or least) cubepos
+ */
 void cubepos::canon_into48(cubepos &dst) const {
   dst = *this;
   canon_into48_aux(dst);
 }
 
-/*:66*//*68:*/
-#line 1383 "cubepos.w"
-
+/**
+ * 
+ */
 void cubepos::randomize() {
   int parity = 0;
   for (int i = 0; i < 7; i++) {
@@ -740,9 +763,9 @@ void cubepos::randomize() {
   e[11] ^= s;
 }
 
-/*:68*//*69:*/
-#line 1422 "cubepos.w"
-
+/**
+ * find the least of the canonicalization of the cubepos and its inverse;
+ */
 void cubepos::canon_into96(cubepos &dst) const {
   cubepos cpi;
   invert_into(cpi);
@@ -755,26 +778,33 @@ void cubepos::canon_into96(cubepos &dst) const {
   cpi.canon_into48_aux(dst);
 }
 
-/*:69*//*76:*/
-#line 1506 "cubepos.w"
 
+/**
+ * output error msg 
+ */
 void error(const char *s) {
   cerr << s << endl;
   if (*s=='!')
     exit(10);
 }
+
 static double start;
+
+/**
+ * 
+ */
 double walltime() {
   struct timeval tv;
   gettimeofday(&tv, 0);
   return tv.tv_sec + 0.000001*tv.tv_usec;
 }
+
+/**
+ * cal duration from start
+ */
 double duration() {
   double now = walltime();
   double r = now - start;
   start = now;
   return r;
 }
-
-
-/*:76*/
