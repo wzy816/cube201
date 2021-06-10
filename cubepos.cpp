@@ -20,6 +20,19 @@ unsigned char cubepos::corner_ori_inc[CUBIES],
 char cubepos::faces[FACES] = {'U', 'F', 'R', 'D', 'B', 'L'};
 
 /**
+ * move names
+ * U1,U2,U3,R1,R2,R3,D1,D2,D3,B1,Bi,B3,L1,L2,L3
+ */
+char const *cubepos::moves[NMOVES] = {
+   "U1", "U2", "U3", 
+   "F1", "F2", "F3", 
+   "R1", "R2", "R3", 
+   "D1", "D2", "D3", 
+   "B1", "B2", "B3", 
+   "L1", "L2", "L3"
+};
+
+/**
  * move routines
  * records how a perticular move(ex. U1) will affect each cubie
  */
@@ -109,6 +122,8 @@ static const char *const smcorners[] = {
     "BUL", "RUB", "LUF", "FUR", "LDB", "BDR", "FDL", "RDF",
 };
 
+
+
 const int INVALID = 99;
 static unsigned char lookup_edge_cubie[FACES*FACES];
 static unsigned char lookup_corner_cubie[FACES*FACES*FACES];
@@ -137,10 +152,10 @@ int cubepos::canon_seq_mask_ext[CANONSEQSTATES];
 
 /**
  * two kinds of representation of a cube
- * 1,for each corner and edge cubie, indicates what slot it is in and what orientation it has in that slot
- * 2.for each slot, what cubie is in the slot and what orientation it 
+ * 1. for each corner and edge cubie, indicates what slot it is in and what orientation it has in that slot
+ * 2. for each slot, what cubie is in the slot and what orientation it 
  * 
- * convert from 1 (default) to 2
+ * this function convert between this two representions
  */ 
 void cubepos::invert_into(cubepos &dst) const {
   for (int i = 0; i < 8; i++) {
@@ -243,7 +258,6 @@ static void face_map_multiply(unsigned char *a, unsigned char *b,
   for (int i = 0; i < 6; i++)
     c[i] = b[a[i]];
 }
-
 
 /**
  * init
@@ -777,7 +791,6 @@ void cubepos::canon_into96(cubepos &dst) const {
   canon_into48_aux(dst);
   cpi.canon_into48_aux(dst);
 }
-
 
 /**
  * output error msg 

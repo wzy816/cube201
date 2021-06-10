@@ -17,7 +17,6 @@ using namespace std;
 /**
  * number of moves
  * 6 faces * 3 twists 
- * U1,U2,U3,R1,R2,R3,D1,D2,D3,B1,Bi,B3,L1,L2,L3
  */
 const int NMOVES = 18;
 
@@ -205,7 +204,7 @@ class cubepos {
 
   void randomize();
 
-
+  static char const *moves[NMOVES];
   static char faces[FACES];
 
   static unsigned char edge_trans[NMOVES][CUBIES],
@@ -217,10 +216,10 @@ class cubepos {
   static unsigned char invm[M], mm[M][M];
   static unsigned char rot_edge[M][CUBIES], rot_corner[M][CUBIES];
 
-  /**
+      /**
    * canon
    */
-  static unsigned char canon_seq[CANONSEQSTATES][NMOVES];
+      static unsigned char canon_seq[CANONSEQSTATES][NMOVES];
   static int canon_seq_mask[CANONSEQSTATES];
   static int canon_seq_mask_ext[CANONSEQSTATES];
 
