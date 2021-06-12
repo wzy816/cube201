@@ -460,6 +460,16 @@ moveseq cubepos::invert_sequence(const moveseq &seq) {
 }
 
 /**
+ * generate random move sequence
+ */
+moveseq cubepos::random_moveseq(int size){
+  moveseq r;
+  for (int i = -2; i < size; i++)
+    r.push_back(random_move());
+  return r;
+}
+
+/**
  * swap macro
  */
 #define ROT2(cc, a, b) {unsigned char t= cc[a];cc[a]= cc[b];cc[b]= t;}
@@ -746,14 +756,14 @@ void cubepos::canon_into48(cubepos &dst) const {
 void cubepos::randomize() {
   int parity = 0;
   for (int i = 0; i < 7; i++) {
-    int j = i + (int) ((8 - i)*myrand());
+    int j = i + (int) ((8 - i)*drand48());
     if (i!=j) {
       swap(c[i], c[j]);
       parity++;
     }
   }
   for (int i = 0; i < 11; i++) {
-    int j = i + (int) ((12 - i)*myrand());
+    int j = i + (int) ((12 - i)*drand48());
     if (i!=j) {
       swap(e[i], e[j]);
       parity++;
@@ -763,14 +773,14 @@ void cubepos::randomize() {
     swap(e[10], e[11]);
   int s = 24;
   for (int i = 0; i < 7; i++) {
-    int a = (int) (3*myrand());
+    int a = (int) (3*drand48());
     s -= a;
     c[i] = corner_val(corner_perm(c[i]), a);
   }
   c[7] = corner_val(corner_perm(c[7]), s%3);
   s = 0;
   for (int i = 0; i < 11; i++) {
-    int a = (int) (2*myrand());
+    int a = (int) (2*drand48());
     e[i] = edge_ori_add(e[i], a);
     s ^= a;
   }

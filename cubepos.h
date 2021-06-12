@@ -63,9 +63,7 @@ const int CANONSEQSTART = 0;
  * util
  */
 void error(const char *s);
-inline double myrand() { return drand48(); }
-inline int random_move() { return (int) (NMOVES*myrand()); }
-inline int random_move_ext() { return (int) (NMOVES*myrand()); }
+inline int random_move() { return (int) (NMOVES*drand48()); }
 double walltime();
 double duration();
 
@@ -166,12 +164,16 @@ class cubepos {
 
   static moveseq invert_sequence(const moveseq &sequence);
 
+  static moveseq random_moveseq(const int len);
+
   void invert_into(cubepos &dst) const;
 
   void movepc(int mov);
 
+  /* right multiplication */
   static void mul(const cubepos &a, const cubepos &b, cubepos &r);
 
+  /* left multiplication */
   inline static void mulpc(const cubepos &a, const cubepos &b, cubepos &r) {
     mul(b, a, r);
   }
