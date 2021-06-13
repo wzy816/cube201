@@ -33,7 +33,7 @@ const int FACES = 6;
 
 /** 
  * number of automorphism
- * ? should be 8 distinct corner * 3 global rotation = 24, why reflection
+ * 8 distinct corner * 3 global rotation = 24, plus 24 mirror positions
  */
 const int M = 48;
 

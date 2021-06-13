@@ -29,7 +29,7 @@ void print_ms(moveseq &ms){
 }
 
 int main(int argc, char *argv[]) {
-	cubepos cp, cp2,cp3;
+	cubepos cp, cp2, cp3, cp4;
 
 	if (lrand48() == 0)
 		srand48(getpid() + time(0));
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
 	cout << endl << "== do same move 4 times will return it to the original ==" << endl;
 	cout << "== testing cp.move ==" << endl;
 	for (int i = 0;i<FACES; i++){
-		cout << endl << "== case " << i << "==" << endl;
+		cout << endl << "== case " << i << " ==" << endl;
 		cout << "cube before move" << endl;
 		print_cp(cp);
 		for (int j = 0; j < 4;j++) {
@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
 	cout << endl << "== invert cube from move seqs equals cube from inverted move seq ==" << endl;
 	cout << "== testing cubepos::random_moveseq, cubepos::invert_sequence cp.invert_into ==" << endl;
 	for (int i = 0; i < 10;i++){
-		cout << endl << "== random case " << i << "==" << endl;
+		cout << endl << "== random case " << i << " ==" << endl;
 		moveseq ms = cubepos::random_moveseq(10);
 		moveseq ms_inverted = cubepos::invert_sequence(ms);
 		print_ms(ms);
@@ -86,5 +86,132 @@ int main(int argc, char *argv[]) {
 		print_cp(cp3);
 		cout << "cube after inverted move sequence" << endl;
 		print_cp(cp2);
+	}
+
+	cout << endl << "== cube move from seq a and b equals r from mul(a,b,r) ==" << endl;
+	cout << "== testing cubepos::mul == " << endl;
+	for (int i = 0; i < 10; i++)
+	{
+		cout << endl << "== random case " << i << " ==" << endl;
+		moveseq ms1 = cubepos::random_moveseq(10);
+		print_ms(ms1);
+		moveseq ms2 = cubepos::random_moveseq(10);
+		print_ms(ms2);
+		cp = identity_cube;
+		cp2 = identity_cube;
+		cp3 = identity_cube;
+		for (int j = 0; j < ms1.size();++j){
+			cp2.move(ms1[j]);
+			cp.move(ms1[j]);
+		}
+		cout << "cube after ms1" << endl;
+		print_cp(cp);
+		for (int j = 0; j < ms2.size(); ++j)
+		{
+			cp3.move(ms2[j]);
+			cp.move(ms2[j]);
+		}
+		cout << "cube after ms2" << endl;
+		print_cp(cp);
+		cubepos::mul(cp2, cp3, cp4);
+		cout << "cube from mul cp2 from ms1 and cp3 from ms2 separately" << endl;
+		print_cp(cp4);
+	}
+
+	cout << endl << "== cube movepc from seq a and b equals r from mulpc(a,b,r) ==" << endl;
+	cout << "== testing cubepos::mulpc == " << endl;
+	for (int i = 0; i < 10; i++)
+	{
+		cout << endl << "== random case " << i << " ==" << endl;
+		moveseq ms1 = cubepos::random_moveseq(10);
+		print_ms(ms1);
+		moveseq ms2 = cubepos::random_moveseq(10);
+		print_ms(ms2);
+		cp = identity_cube;
+		cp2 = identity_cube;
+		cp3 = identity_cube;
+		for (int j = 0; j < ms1.size();++j){
+			cp2.movepc(ms1[j]);
+			cp.movepc(ms1[j]);
+		}
+		cout << "cube after ms1" << endl;
+		print_cp(cp);
+		for (int j = 0; j < ms2.size(); ++j)
+		{
+			cp3.movepc(ms2[j]);
+			cp.movepc(ms2[j]);
+		}
+		cout << "cube after ms2" << endl;
+		print_cp(cp);
+		cubepos::mulpc(cp2, cp3, cp4);
+		cout << "cube from mul cp2 from ms1 and cp3 from ms2 separately" << endl;
+		print_cp(cp4);
+	}
+
+	cout << endl << "== use append to convert move seq to char[], use parse to convert char[] back to move seq==" << endl;
+	cout << "== testing cubepos::append_moveseq, cubepos::parse_moveseq ==" << endl;
+	for (int i = 0; i < 10; i++)
+	{
+		cout << endl << "== random case " << i << " ==" << endl;
+		moveseq ms1 = cubepos::random_moveseq(10);
+		cout << "original move seq" << endl;
+		print_ms(ms1);
+		char buf[20]; // 10 steps took 20 char
+		char *p1 = buf;
+		cubepos::append_moveseq(p1, ms1);
+		cout << "print move string" << endl;
+		for (int j = 0; j < 20;++j){
+			cout << buf[j] << " ";
+		}
+		cout << endl;
+		const char *p2 = buf;
+		cout << "move seq from parse" << endl;
+		moveseq ms2 = cubepos::parse_moveseq(p2);
+		print_ms(ms2);
+	}
+
+	cout << endl << "== testing generating and parsing singamster string ==" << endl;
+	cout << "== testing cp.Singmaster_string, cp.parse_Singmaster ==" << endl;
+	for (int i = 0; i < 10; i++)
+	{
+		cout << endl << "== random case " << i << " ==" << endl;
+		cp = identity_cube;
+		cp.randomize();
+		cout << "print cp after randomize" << endl;
+		char buf[100];
+		strcpy(buf, cp.Singmaster_string());
+		print_cp(cp);
+		cout << "print cp singamaster string after randomize" << endl;
+		for (int j = 0; j < 100;++j){
+			cout << buf[j] << " ";
+		}
+		cout << endl;
+		cp2.parse_Singmaster(buf);
+		cout << "cp2 from parseing cp's singamaster string" << endl;
+		print_cp(cp2);
+	}
+	
+	cout << endl << "== remap a cube after move seq equals apply remap on each move ==" <<endl;
+	cout << "== testing cubepos::move_map, cp.remap_into ==" << endl;
+	for (int i = 0; i < 10; i++)
+	{
+		int mirror_index = (int)(M * drand48());
+		cout << endl << "== case " << i << " mirror index=" << mirror_index << " ==" << endl;
+		moveseq ms = cubepos::random_moveseq(10);
+		print_ms(ms);
+		cp = identity_cube;
+		cp2 = identity_cube;
+		for (int j = 0; j < ms.size();++j){
+			cp.move(ms[j]);
+			cp2.move(cubepos::move_map[mirror_index][ms[j]]);
+		}
+		cout << "cp2 after remap each move" << endl;
+		print_cp(cp2);
+
+		cout << "cp before remap into" << endl;
+		print_cp(cp);
+		cout << "cp after remap into" << endl;
+		cp.remap_into(mirror_index, cp3);
+		print_cp(cp3);
 	}
 }

@@ -98,11 +98,10 @@ static char static_buf[200];
 
 
 /**
- * solved cube in Singmaster notation with orientation
+ * represent a solved cube in Singmaster notation with orientation
  */ 
 static const char *sing_solved =
     "UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR";
-
 
 /**
  * edge and corner cubies
@@ -121,7 +120,6 @@ static const char *const smcorners[] = {
     "LBU", "BRU", "FLU", "RFU", "BLD", "RBD", "LFD", "FRD",
     "BUL", "RUB", "LUF", "FUR", "LDB", "BDR", "FDL", "RDF",
 };
-
 
 
 const int INVALID = 99;
@@ -641,18 +639,18 @@ void cubepos::append_move(char *&p, int mv) {
   *p = 0;
 }
 
+void cubepos::append_moveseq(char *&p, const moveseq &seq) {
+  *p = 0;
+  for (unsigned int i = 0; i < seq.size(); i++)
+    append_move(p, seq[i]);
+}
+
 moveseq cubepos::parse_moveseq(const char *&p) {
   moveseq r;
   int mv;
   while ((mv = parse_move(p)) >= 0)
     r.push_back(mv);
   return r;
-}
-
-void cubepos::append_moveseq(char *&p, const moveseq &seq) {
-  *p = 0;
-  for (unsigned int i = 0; i < seq.size(); i++)
-    append_move(p, seq[i]);
 }
 
 char *cubepos::moveseq_string(const moveseq &seq) {
@@ -751,7 +749,7 @@ void cubepos::canon_into48(cubepos &dst) const {
 }
 
 /**
- * 
+ * shuffle cube with parity kept
  */
 void cubepos::randomize() {
   int parity = 0;
