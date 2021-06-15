@@ -6,17 +6,18 @@
 #ifndef CUBEPOS_H
 #define CUBEPOS_H
 
-#include <cstring>
-#include <cstdlib>
 #include <stddef.h>
-#include <vector>
-#include <algorithm>
 #include <sys/time.h>
+
+#include <algorithm>
+#include <cstdlib>
+#include <cstring>
+#include <vector>
 using namespace std;
 
 /**
  * number of moves
- * 6 faces * 3 twists 
+ * 6 faces * 3 twists
  */
 const int NMOVES = 18;
 
@@ -31,7 +32,7 @@ const int TWISTS = 3;
  */
 const int FACES = 6;
 
-/** 
+/**
  * number of automorphism
  * 8 distinct corner * 3 global rotation = 24, plus 24 mirror positions
  */
@@ -39,7 +40,7 @@ const int M = 48;
 
 /**
  * number of states
- * 
+ *
  * for corner that is 8 slots * 3 orientations
  * for edges that is 12 slots * 2 orientations
  */
@@ -50,8 +51,10 @@ const int CUBIES = 24;
  */
 extern const class cubepos identity_cube;
 
+/**
+ *  move sequence
+ */
 typedef vector<int> moveseq;
-
 
 const int ALLMOVEMASK = (1 << NMOVES) - 1;
 const int ALLMOVEMASK_EXT = (1 << NMOVES) - 1;
@@ -63,14 +66,22 @@ const int CANONSEQSTART = 0;
  * util
  */
 void error(const char *s);
-inline int random_move() { return (int) (NMOVES*drand48()); }
+inline int random_move() { return (int)(NMOVES * drand48()); }
 double walltime();
 double duration();
 
+/**
+ *  pos constant
+ */
+unsigned int allpos[] = {1,      18,      243,       3240,      43239,
+                         574908, 7618438, 100803036, 1332343287};
+unsigned int c47pos[] = {1,     2,      9,       75,       934,
+                         12077, 159131, 2101575, 27762103, 366611211};
+unsigned int c95pos[] = {1,    2,     8,       48,       509,
+                         6198, 80178, 1053077, 13890036, 183339528};
 
 class cubepos {
  public:
-
   /**
    * compare function
    */
@@ -78,21 +89,21 @@ class cubepos {
     return memcmp(this, &cp, sizeof(cp)) < 0;
   }
   inline bool operator==(const cubepos &cp) const {
-    return memcmp(this, &cp, sizeof(cp))==0;
+    return memcmp(this, &cp, sizeof(cp)) == 0;
   }
   inline bool operator!=(const cubepos &cp) const {
-    return memcmp(this, &cp, sizeof(cp))!=0;
+    return memcmp(this, &cp, sizeof(cp)) != 0;
   }
 
   /**
    * corner representation
-   * 
+   *
    * indexing by layer
    *  0 - 1    - - -    4 - 5
-   *  - - -    - - -    - - - 
+   *  - - -    - - -    - - -
    *  2 - 3    - - -    6 - 7
    *   top     middle   bottom
-   * 
+   *
    * bit structure
    * [-,-,-, twist, twist, slot, slot, slot]
    */
@@ -100,40 +111,44 @@ class cubepos {
 
   /**
    * corner orientation array
-   */ 
+   */
   static unsigned char corner_ori_inc[CUBIES], corner_ori_dec[CUBIES],
-      corner_ori_neg_strip[CUBIES], mod24[2*CUBIES];
+      corner_ori_neg_strip[CUBIES], mod24[2 * CUBIES];
 
   /**
-   * corner permutation and orientation functions 
+   * corner permutation and orientation functions
    */
   /* get 1-3 low bit */
   static inline int corner_perm(int cubieval) { return cubieval & 7; }
   /* get 4-8 high bit, 0=no twist, 1=clockwise, 2=counterclockwise */
   static inline int corner_ori(int cubieval) { return cubieval >> 3; }
   /* combine perm and ori to char */
-  static inline int corner_val(int perm, int ori) { return ori*8 + perm; }
+  static inline int corner_val(int perm, int ori) { return ori * 8 + perm; }
   /* */
-  static inline int corner_ori_add(int cv1, int cv2) { return mod24[cv1 + (cv2 & 0x18)]; }
+  static inline int corner_ori_add(int cv1, int cv2) {
+    return mod24[cv1 + (cv2 & 0x18)];
+  }
   /* */
-  static inline int corner_ori_sub(int cv1, int cv2) { return cv1 + corner_ori_neg_strip[cv2]; }
+  static inline int corner_ori_sub(int cv1, int cv2) {
+    return cv1 + corner_ori_neg_strip[cv2];
+  }
 
   /**
    * edge representation
-   * 
+   *
    * indexing by layer
-   *  - 0 -    4 - 5 .  - 8 - 
+   *  - 0 -    4 - 5 .  - 8 -
    *  1 - 2    - - -    9 - 10
    *  - 3 -    6 - 7 .  - 11 -
    *   top     middle   bottom
-   * 
+   *
    * bit structure
    * [-,-,-, slot, slot, slot, slot, flip]
    */
   unsigned char e[12];
 
   /**
-   * edge permutation and orientation functions 
+   * edge permutation and orientation functions
    */
   /* get 2-8 high bit */
   static inline int edge_perm(int cubieval) { return cubieval >> 1; }
@@ -142,10 +157,11 @@ class cubepos {
   /* XOR on 1 low bit */
   static inline int edge_flip(int cubieval) { return cubieval ^ 1; }
   /* combine perm and ori to char */
-  static inline int edge_val(int perm, int ori) { return perm*2 + ori; }
+  static inline int edge_val(int perm, int ori) { return perm * 2 + ori; }
   /* */
-  static inline int edge_ori_add(int cv1, int cv2) { return cv1 ^ edge_ori(cv2); }
-
+  static inline int edge_ori_add(int cv1, int cv2) {
+    return cv1 ^ edge_ori(cv2);
+  }
 
   /**
    * init
@@ -178,7 +194,6 @@ class cubepos {
     mul(b, a, r);
   }
 
-
   /**
    * parsing and printing
    */
@@ -191,7 +206,6 @@ class cubepos {
   static moveseq parse_moveseq(const char *&p);
   static void append_moveseq(char *&p, const moveseq &seq);
   static char *moveseq_string(const moveseq &seq);
-
 
   /**
    * read and write of singmaster notation
@@ -209,8 +223,7 @@ class cubepos {
   static char const *moves[NMOVES];
   static char faces[FACES];
 
-  static unsigned char edge_trans[NMOVES][CUBIES],
-      corner_trans[NMOVES][CUBIES];
+  static unsigned char edge_trans[NMOVES][CUBIES], corner_trans[NMOVES][CUBIES];
 
   static unsigned char inv_move[NMOVES];
 
@@ -218,10 +231,10 @@ class cubepos {
   static unsigned char invm[M], mm[M][M];
   static unsigned char rot_edge[M][CUBIES], rot_corner[M][CUBIES];
 
-      /**
-   * canon
+  /**
+   * masks
    */
-      static unsigned char canon_seq[CANONSEQSTATES][NMOVES];
+  static unsigned char canon_seq[CANONSEQSTATES][NMOVES];
   static int canon_seq_mask[CANONSEQSTATES];
   static int canon_seq_mask_ext[CANONSEQSTATES];
 
@@ -231,9 +244,13 @@ class cubepos {
   static inline int next_cs(int cs, int mv) { return canon_seq[cs][mv]; }
   static inline int cs_mask(int cs) { return canon_seq_mask[cs]; }
   static inline int cs_mask_ext(int cs) { return canon_seq_mask_ext[cs]; }
+
+  /**
+   *
+   */
+  void show();
 };
 
 static cubepos cubepos_initialization_hack(1, 2, 3);
-
 
 #endif
