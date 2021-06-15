@@ -73,7 +73,7 @@ double duration();
 /**
  *  pos constant
  */
-unsigned int allpos[] = {1,      18,      243,       3240,      43239,
+unsigned int allpos[] = {0,      18,      243,       3240,      43239,
                          574908, 7618438, 100803036, 1332343287};
 unsigned int c47pos[] = {1,     2,      9,       75,       934,
                          12077, 159131, 2101575, 27762103, 366611211};
@@ -119,9 +119,9 @@ class cubepos {
    * corner permutation and orientation functions
    */
   /* get 1-3 low bit */
-  static inline int corner_perm(int cubieval) { return cubieval & 7; }
+  static inline int corner_perm(int cubie_val) { return cubie_val & 7; }
   /* get 4-8 high bit, 0=no twist, 1=clockwise, 2=counterclockwise */
-  static inline int corner_ori(int cubieval) { return cubieval >> 3; }
+  static inline int corner_ori(int cubie_val) { return cubie_val >> 3; }
   /* combine perm and ori to char */
   static inline int corner_val(int perm, int ori) { return ori * 8 + perm; }
   /* */
@@ -151,11 +151,11 @@ class cubepos {
    * edge permutation and orientation functions
    */
   /* get 2-8 high bit */
-  static inline int edge_perm(int cubieval) { return cubieval >> 1; }
+  static inline int edge_perm(int cubie_val) { return cubie_val >> 1; }
   /* get 1 low bit, 1=flip, 0=not flip */
-  static inline int edge_ori(int cubieval) { return cubieval & 1; }
+  static inline int edge_ori(int cubie_val) { return cubie_val & 1; }
   /* XOR on 1 low bit */
-  static inline int edge_flip(int cubieval) { return cubieval ^ 1; }
+  static inline int edge_flip(int cubie_val) { return cubie_val ^ 1; }
   /* combine perm and ori to char */
   static inline int edge_val(int perm, int ori) { return perm * 2 + ori; }
   /* */

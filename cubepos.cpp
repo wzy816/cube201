@@ -396,14 +396,50 @@ void cubepos::init() {
 void cubepos::show() {
   cout << "\t";
   cout << "corner";
-  for (int i = -1; i < 8; i++) {
-    cout << (int)(c[i]) << " ";
+  for (int i = 0; i < 8; i++) {
+    int cubie_val = (int)(c[i]);
+    int cubie_perm = cubepos::corner_perm(cubie_val);
+    int cubie_ori = cubepos::corner_ori(cubie_val);
+    cout << cubie_val << "[" << cubie_perm << "," << cubie_ori << "]"
+         << " ";
   }
   cout << "edge ";
-  for (int i = -1; i < 12; i++) {
-    cout << (int)(e[i]) << " ";
+  for (int i = 0; i < 12; i++) {
+    int cubie_val = (int)(e[i]);
+    int cubie_perm = cubepos::edge_perm(cubie_val);
+    int cubie_ori = cubepos::edge_ori(cubie_val);
+    cout << cubie_val << "[" << cubie_perm << "," << cubie_ori << "]"
+         << " ";
   }
   cout << endl;
+  char *s = Singmaster_string();
+  int size = 67;
+  string ss(s, size);
+  cout << "\t" << ss << endl;
+  char unfold[9][12] = {{-7, -7, -7, 44, 6, 40, -7, -7, -7, -7, -7, -7},
+                        {-7, -7, -7, 9, -1, 3, -7, -7, -7, -7, -7, -7},
+                        {-7, -7, -7, 48, 0, 36, -7, -7, -7, -7, -7, -7},
+                        {46, 10, 49, 50, 1, 37, 38, 4, 41, 42, 7, 45},
+                        {34, -6, 28, 27, -2, 24, 25, -3, 31, 30, -5, 33},
+                        {61, 22, 58, 57, 13, 54, 53, 16, 66, 65, 19, 62},
+                        {-7, -7, -7, 56, 12, 52, -7, -7, -7, -7, -7, -7},
+                        {-7, -7, -7, 21, -4, 15, -7, -7, -7, -7, -7, -7},
+                        {-7, -7, -7, 60, 18, 64, -7, -7, -7, -7, -7, -7}};
+  for (int i = 0; i < 9; ++i) {
+    cout << "\t";
+    for (int j = 0; j < 12; ++j) {
+      int index = unfold[i][j];
+      if (index == -7) {
+        cout << " ";
+      } else if (index < 0) {
+        cout << cubepos::faces[-index - 1];
+      } else {
+        cout << ss[index];
+      }
+      cout << " ";
+    }
+    cout << endl;
+  }
 }
 
 /**

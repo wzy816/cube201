@@ -255,7 +255,32 @@ int main(int argc, char *argv[]) {
   cout << endl << "== show canon state arry ==" << endl;
   cout << "== testing canon_seq, canon_seq_mask, canon_seq_mask_ext ==" << endl;
   cp = identity_cube;
-  cp.show_mask();
+
+  cout << "canon_seq" << endl;
+  for (int i = 0; i < CANONSEQSTATES; ++i) {
+    for (int j = 0; j < NMOVES; ++j) {
+      cout << (int)cubepos::canon_seq[i][j] << " ";
+    }
+    cout << endl;
+  }
+  cout << endl;
+
+  cout << "canon_seq_mask" << endl;
+  for (int i = 0; i < CANONSEQSTATES; ++i) {
+    long long unsigned c = cubepos::canon_seq_mask[i];
+    bitset<18> bitset1{c};
+    cout << bitset1 << endl;
+  }
+  cout << endl;
+
+  cout << "canon_seq_mask_ext" << endl;
+  for (int i = 0; i < CANONSEQSTATES; ++i) {
+    long long unsigned c = cubepos::canon_seq_mask_ext[i];
+    bitset<18> bitset1{c};
+    cout << bitset1 << endl;
+  }
+
+  cout << endl;
 
   cout << endl
        << "== verify logic to use mask to prune invalid move ==" << endl;
@@ -285,4 +310,25 @@ int main(int argc, char *argv[]) {
       canon_state = cubepos::canon_seq[canon_state][mv];
     }
   }
+
+  cout << endl << "== test show ==" << endl;
+  cout << "set to identity" << endl;
+  int mv = 0;
+  cp = identity_cube;
+  cp.show();
+  cout << cp.moves[mv] << endl;
+  cp.move(mv);
+  cout << "after move" << endl;
+  cp.show();
+  cout << "reset to identity" << endl;
+  cp = identity_cube;
+  cp.show();
+  cout << cp.moves[mv] << endl;
+  cp.movepc(mv);
+  cout << "after movepc" << endl;
+  cp.show();
+  cp2 = identity_cube;
+  cp.invert_into(cp2);
+  cout << "after invert" << endl;
+  cp2.show();
 }
