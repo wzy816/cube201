@@ -7,6 +7,14 @@
 
 using namespace std;
 
+// generate random move sequence
+moveseq random_moveseq(int size) {
+  moveseq r;
+  for (int i = -2; i < size; i++) r.push_back(NMOVES * drand48());
+  return r;
+}
+
+// print move seq
 void print_ms(moveseq &ms) {
   cout << "\t";
   cout << "moveseq ";
@@ -19,10 +27,9 @@ void print_ms(moveseq &ms) {
 int main(int argc, char *argv[]) {
   cubepos cp, cp2, cp3, cp4;
 
-  if (lrand48() == 0) srand48(getpid() + time(0));
-
+  // cp.move
+  // cp.movepc
   cout << endl << "== a movepc should undo a move ==" << endl;
-  cout << "== testing cp.move, cp.movepc ==" << endl;
   for (int i = 0; i < NMOVES; i++) {
     cout << endl << "== move " << cp.moves[i] << " ==" << endl;
     cout << "cube" << endl;
@@ -35,9 +42,9 @@ int main(int argc, char *argv[]) {
     cp.show();
   }
 
+  // cp.move
   cout << endl
        << "== do same move 4 times will return it to the original ==" << endl;
-  cout << "== testing cp.move ==" << endl;
   for (int i = 0; i < FACES; i++) {
     cout << endl << "== case " << i << " ==" << endl;
     cout << "cube before move" << endl;
@@ -50,15 +57,14 @@ int main(int argc, char *argv[]) {
     cp.show();
   }
 
+  // cubepos::invert_sequence
+  // cp.invert_into
   cout << endl
        << "== invert cube from move seqs equals cube from inverted move seq =="
        << endl;
-  cout << "== testing cubepos::random_moveseq, cubepos::invert_sequence, "
-          "cp.invert_into =="
-       << endl;
   for (int i = 0; i < 10; i++) {
     cout << endl << "== random case " << i << " ==" << endl;
-    moveseq ms = cubepos::random_moveseq(10);
+    moveseq ms = random_moveseq(10);
     moveseq ms_inverted = cubepos::invert_sequence(ms);
     print_ms(ms);
     cout << "inverted move sequence" << endl;
@@ -78,14 +84,14 @@ int main(int argc, char *argv[]) {
     cp2.show();
   }
 
+  // cubepos::mul
   cout << endl
        << "== cube move from seq a and b equals r from mul(a,b,r) ==" << endl;
-  cout << "== testing cubepos::mul == " << endl;
   for (int i = 0; i < 10; i++) {
     cout << endl << "== random case " << i << " ==" << endl;
-    moveseq ms1 = cubepos::random_moveseq(10);
+    moveseq ms1 = random_moveseq(10);
     print_ms(ms1);
-    moveseq ms2 = cubepos::random_moveseq(10);
+    moveseq ms2 = random_moveseq(10);
     print_ms(ms2);
     cp = identity_cube;
     cp2 = identity_cube;
@@ -107,15 +113,15 @@ int main(int argc, char *argv[]) {
     cp4.show();
   }
 
+  // cubepos::mulpc
   cout << endl
        << "== cube movepc from seq a and b equals r from mulpc(a,b,r) =="
        << endl;
-  cout << "== testing cubepos::mulpc == " << endl;
   for (int i = 0; i < 10; i++) {
     cout << endl << "== random case " << i << " ==" << endl;
-    moveseq ms1 = cubepos::random_moveseq(10);
+    moveseq ms1 = random_moveseq(10);
     print_ms(ms1);
-    moveseq ms2 = cubepos::random_moveseq(10);
+    moveseq ms2 = random_moveseq(10);
     print_ms(ms2);
     cp = identity_cube;
     cp2 = identity_cube;
@@ -137,15 +143,15 @@ int main(int argc, char *argv[]) {
     cp4.show();
   }
 
+  // cubepos::append_moveseq
+  // cubepos::parse_moveseq
   cout << endl
        << "== use append to convert move seq to char[], use parse to convert "
           "char[] back to move seq=="
        << endl;
-  cout << "== testing cubepos::append_moveseq, cubepos::parse_moveseq =="
-       << endl;
   for (int i = 0; i < 10; i++) {
     cout << endl << "== random case " << i << " ==" << endl;
-    moveseq ms1 = cubepos::random_moveseq(10);
+    moveseq ms1 = random_moveseq(10);
     cout << "original move seq" << endl;
     print_ms(ms1);
     char buf[20];  // 10 steps took 20 char
@@ -161,10 +167,10 @@ int main(int argc, char *argv[]) {
     moveseq ms2 = cubepos::parse_moveseq(p2);
     print_ms(ms2);
   }
-
+  // cp.Singmaster_string
+  // cp.parse_Singmaster
   cout << endl
        << "== testing generating and parsing singamster string ==" << endl;
-  cout << "== testing cp.Singmaster_string, cp.parse_Singmaster ==" << endl;
   for (int i = 0; i < 10; i++) {
     cout << endl << "== random case " << i << " ==" << endl;
     cp = identity_cube;
@@ -183,16 +189,17 @@ int main(int argc, char *argv[]) {
     cp2.show();
   }
 
+  // cubepos::move_map
+  // cp.remap_into
   cout << endl
        << "== remap a cube after move seq equals apply remap on each move =="
        << endl;
-  cout << "== testing cubepos::move_map, cp.remap_into ==" << endl;
   for (int i = 0; i < 10; i++) {
     int mirror_index = (int)(M * drand48());
     cout << endl
          << "== case " << i << " mirror index=" << mirror_index
          << " ==" << endl;
-    moveseq ms = cubepos::random_moveseq(10);
+    moveseq ms = random_moveseq(10);
     print_ms(ms);
     cp = identity_cube;
     cp2 = identity_cube;
@@ -210,18 +217,18 @@ int main(int argc, char *argv[]) {
     cp3.show();
   }
 
+  // cp.canon_into48
   cout << endl
        << "== remap a cube to any mirror won't change canon_into48 or "
           "canon_into96 result =="
        << endl;
-  cout << "== testing cp.canon_into48 ==" << endl;
   for (int i = 0; i < 10; i++) {
     cout << endl << "== random case " << i << " ==" << endl;
     cp = identity_cube;
     cp2 = identity_cube;
     cp3 = identity_cube;
     cp4 = identity_cube;
-    moveseq ms1 = cubepos::random_moveseq(10);
+    moveseq ms1 = random_moveseq(10);
     print_ms(ms1);
     for (int j = 0; j < ms1.size(); ++j) {
       cp.move(ms1[j]);
@@ -252,10 +259,9 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  // canon_seq, canon_seq_mask
   cout << endl << "== show canon state arry ==" << endl;
-  cout << "== testing canon_seq, canon_seq_mask, canon_seq_mask_ext ==" << endl;
   cp = identity_cube;
-
   cout << "canon_seq" << endl;
   for (int i = 0; i < CANONSEQSTATES; ++i) {
     for (int j = 0; j < NMOVES; ++j) {
@@ -264,7 +270,6 @@ int main(int argc, char *argv[]) {
     cout << endl;
   }
   cout << endl;
-
   cout << "canon_seq_mask" << endl;
   for (int i = 0; i < CANONSEQSTATES; ++i) {
     long long unsigned c = cubepos::canon_seq_mask[i];
@@ -273,21 +278,12 @@ int main(int argc, char *argv[]) {
   }
   cout << endl;
 
-  cout << "canon_seq_mask_ext" << endl;
-  for (int i = 0; i < CANONSEQSTATES; ++i) {
-    long long unsigned c = cubepos::canon_seq_mask_ext[i];
-    bitset<18> bitset1{c};
-    cout << bitset1 << endl;
-  }
-
-  cout << endl;
-
+  // (mask>>mv) & 1
   cout << endl
        << "== verify logic to use mask to prune invalid move ==" << endl;
-  cout << "== testing (mask>>mv) & 1 ==" << endl;
   for (int i = 0; i < 10; i++) {
     cout << endl << "== case " << i;
-    moveseq ms = cubepos::random_moveseq(20);
+    moveseq ms = random_moveseq(20);
     cout << endl;
     print_ms(ms);
     int canon_state = CANONSEQSTART;
@@ -295,7 +291,7 @@ int main(int argc, char *argv[]) {
       int mv = ms[j];
       cout << "move " << mv << " " << cp.moves[mv] << " canon state "
            << canon_state << ", ";
-      int mask = cubepos::canon_seq_mask[canon_state];
+      int mask = cp.cs_mask(canon_state);
       long long unsigned c = mask;
       bitset<18> bitset1{(long long unsigned)mask};
       cout << "mask " << bitset1 << ", ";
@@ -307,10 +303,11 @@ int main(int argc, char *argv[]) {
         break;
       }
       cout << endl;
-      canon_state = cubepos::canon_seq[canon_state][mv];
+      canon_state = cp.next_cs(canon_state, mv);
     }
   }
 
+  // cp.show
   cout << endl << "== test show ==" << endl;
   cout << "set to identity" << endl;
   int mv = 0;
@@ -320,15 +317,4 @@ int main(int argc, char *argv[]) {
   cp.move(mv);
   cout << "after move" << endl;
   cp.show();
-  cout << "reset to identity" << endl;
-  cp = identity_cube;
-  cp.show();
-  cout << cp.moves[mv] << endl;
-  cp.movepc(mv);
-  cout << "after movepc" << endl;
-  cp.show();
-  cp2 = identity_cube;
-  cp.invert_into(cp2);
-  cout << "after invert" << endl;
-  cp2.show();
 }

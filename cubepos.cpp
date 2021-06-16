@@ -5,66 +5,52 @@
 #include <bitset>
 #include <iostream>
 
-/**
- * identity_cube
- */
+// identity_cube
 const cubepos identity_cube(0, 0, 0);
-unsigned char cubepos::corner_ori_inc[CUBIES], cubepos::corner_ori_dec[CUBIES],
-    cubepos::corner_ori_neg_strip[CUBIES], cubepos::mod24[2 * CUBIES];
 
-/**
- * face labeling (0 to 5)
- *  i and (i+3)%6 are opposite faces
- *  3 consecutive faces define a corner
- *  i and (not (i+3)%6) define a edge
- */
+//
+unsigned char cubepos::corner_ori_inc[CUBIES];
+unsigned char cubepos::corner_ori_dec[CUBIES];
+unsigned char cubepos::corner_ori_neg_strip[CUBIES];
+unsigned char cubepos::mod24[2 * CUBIES];
+
+// face labeling (0 to 5)
+// i and (i+3)%6 are opposite faces
+// 3 consecutive faces define a corner
+// i and (not (i+3)%6) define a edge
 char cubepos::faces[FACES] = {'U', 'F', 'R', 'D', 'B', 'L'};
 
-/**
- * move names
- * U1,U2,U3,R1,R2,R3,D1,D2,D3,B1,Bi,B3,L1,L2,L3
- */
+// move names
 char const *cubepos::moves[NMOVES] = {"U1", "U2", "U3", "F1", "F2", "F3",
                                       "R1", "R2", "R3", "D1", "D2", "D3",
                                       "B1", "B2", "B3", "L1", "L2", "L3"};
 
-/**
- * move routines
- * records how a perticular move(ex. U1) will affect each cubie
- */
-unsigned char cubepos::edge_trans[NMOVES][CUBIES],
-    cubepos::corner_trans[NMOVES][CUBIES];
+// move routines
+// records how a perticular move(ex. U1) will affect each cubie
+unsigned char cubepos::edge_trans[NMOVES][CUBIES];
+unsigned char cubepos::corner_trans[NMOVES][CUBIES];
 
-/**
- * affected slot index by edge permutataion
- */
+// affected slot index by edge permutataion
 static const unsigned char edge_twist_perm[FACES][4] = {
     {0, 2, 3, 1},   {3, 7, 11, 6}, {2, 5, 10, 7},
     {9, 11, 10, 8}, {0, 4, 8, 5},  {1, 6, 9, 4}};
 
-/**
- * affected slot index by corner permutataion
- */
+// affected slot index by corner permutataion
 static const unsigned char corner_twist_perm[FACES][4] = {
     {0, 1, 3, 2}, {2, 3, 7, 6}, {3, 1, 5, 7},
     {4, 6, 7, 5}, {1, 0, 4, 5}, {0, 2, 6, 4}};
 
-/**
- * only L or R move modify the edge orientation
- */
+// only L or R move modify the edge orientation
 static const unsigned char edge_change[FACES] = {0, 0, 1, 0, 0, 1};
 
-/**
- * corner orientation definition
- * 0= U/D facelet is in U/D
- * 1= a clockwise twist brings it back
- * 2= a counterclockwise twist brings it back
- *
- * U/D moves will not affect orientation
- * {1,2,1,2} is how a F move will change {2,3,7,6} orientation
- * for cubie 2 and cubie 7, it will preserve U/D face
- * for cubie 3 and cubie 6, it will move U to D or D to U
- */
+// corner orientation definition
+// 0= U/D facelet is in U/D
+// 1= a clockwise twist brings it back
+// 2= a counterclockwise twist brings it back
+// U/D moves will not affect orientation
+// {1,2,1,2} is how a F move will change {2,3,7,6} orientation
+// for cubie 2 and cubie 7, it will preserve U/D face
+// for cubie 3 and cubie 6, it will move U to D or D to U
 static const unsigned char corner_change[FACES][4] = {
     {0, 0, 0, 0}, {1, 2, 1, 2}, {1, 2, 1, 2},
     {0, 0, 0, 0}, {1, 2, 1, 2}, {1, 2, 1, 2},
@@ -72,21 +58,15 @@ static const unsigned char corner_change[FACES][4] = {
 
 unsigned char cubepos::inv_move[NMOVES];
 
-/**
- * result buf
- */
+// result buf
 static char static_buf[200];
 
-/**
- * represent a solved cube in Singmaster notation with orientation
- */
+// represent a solved cube in Singmaster notation with orientation
 static const char *sing_solved =
     "UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR";
 
-/**
- * edge and corner cubies
- * no orientation convention here
- */
+// edge and corner cubies for singmaster notation
+// no orientation convention here
 static const char *const smedges[] = {
     "UB", "BU", "UL", "LU", "UR", "RU", "UF", "FU", "LB", "BL", "RB", "BR",
     "LF", "FL", "RF", "FR", "DB", "BD", "DL", "LD", "DR", "RD", "DF", "FD",
@@ -100,11 +80,11 @@ static const char *const smcorners[] = {
 };
 
 const int INVALID = 99;
-static unsigned char lookup_edge_cubie[FACES * FACES];
-static unsigned char lookup_corner_cubie[FACES * FACES * FACES];
-static unsigned char sm_corner_order[8];
-static unsigned char sm_edge_order[12];
-static unsigned char sm_edge_flipped[12];
+unsigned char lookup_edge_cubie[FACES * FACES];
+unsigned char lookup_corner_cubie[FACES * FACES * FACES];
+unsigned char sm_corner_order[8];
+unsigned char sm_edge_order[12];
+unsigned char sm_edge_flipped[12];
 
 unsigned char cubepos::face_map[M][FACES], cubepos::move_map[M][NMOVES];
 unsigned char cubepos::mm[M][M], cubepos::invm[M];
@@ -115,45 +95,33 @@ static const char *const axis_permute_map[] = {"UFR", "URF", "FRU",
 static const char *const axis_negate_map[] = {"UFR", "UFL", "UBL", "UBR",
                                               "DBR", "DBL", "DFL", "DFR"};
 
-/**
- *
- * canon_seq=
- * 1 1 1 2 2 2 3 3 3 4 4 4 5 5 5 6 6 6
- * 99 99 99 2 2 2 3 3 3 4 4 4 5 5 5 6 6 6
- * 1 1 1 99 99 99 3 3 3 4 4 4 5 5 5 6 6 6
- * 1 1 1 2 2 2 99 99 99 4 4 4 5 5 5 6 6 6
- * 99 99 99 2 2 2 3 3 3 99 99 99 5 5 5 6 6 6
- * 1 1 1 99 99 99 3 3 3 4 4 4 99 99 99 6 6 6
- * 1 1 1 2 2 2 99 99 99 4 4 4 5 5 5 99 99 99
- */
+// 1 1 1 2 2 2 3 3 3 4 4 4 5 5 5 6 6 6
+// 99 99 99 2 2 2 3 3 3 4 4 4 5 5 5 6 6 6
+// 1 1 1 99 99 99 3 3 3 4 4 4 5 5 5 6 6 6
+// 1 1 1 2 2 2 99 99 99 4 4 4 5 5 5 6 6 6
+// 99 99 99 2 2 2 3 3 3 99 99 99 5 5 5 6 6 6
+// 1 1 1 99 99 99 3 3 3 4 4 4 99 99 99 6 6 6
+// 1 1 1 2 2 2 99 99 99 4 4 4 5 5 5 99 99 99
 unsigned char cubepos::canon_seq[CANONSEQSTATES][NMOVES];
 
-/**
- *
- * mask to prune inefficient moves, examples:
- * 1. turn of same face, U1U1 => U2
- * 2. rotations of opposite faces should be ascending,  D1U1 => U1D1
- *
- * canon_seq_mask = canon_seq_mask_ext =
- * 111111111111111111
- * 111111111111111000
- * 111111111111000111
- * 111111111000111111
- * 111111000111111000
- * 111000111111000111
- * 000111111000111111
- */
+// mask to prune inefficient moves, examples:
+// 1. turn of same face, U1U1 => U2
+// 2. rotations of opposite faces should be ascending,  D1U1 => U1D1
+//
+// 111111111111111111
+// 111111111111111000
+// 111111111111000111
+// 111111111000111111
+// 111111000111111000
+// 111000111111000111
+// 000111111000111111
 int cubepos::canon_seq_mask[CANONSEQSTATES];
-int cubepos::canon_seq_mask_ext[CANONSEQSTATES];
 
-/**
- * two kinds of representation of a cube
- * 1. for each corner and edge cubie, indicates what slot it is in and what
- * orientation it has in that slot
- * 2. for each slot, what cubie is in the slot and what orientation it
- *
- * this function convert between this two representions
- */
+// two kinds of representation of a cube
+// 1. for each corner and edge cubie, indicates what slot it is in and what
+// orientation it has in that slot
+// 2. for each slot, what cubie is in the slot and what orientation it
+// this function convert between this two representions
 void cubepos::invert_into(cubepos &dst) const {
   for (int i = 0; i < 8; i++) {
     int cval = c[i];
@@ -165,9 +133,7 @@ void cubepos::invert_into(cubepos &dst) const {
   }
 }
 
-/**
- * parse cubie to base-6 number
- */
+// parse cubie to base-6 number
 static int parse_cubie(const char *&p) {
   cubepos::skip_whitespace(p);
   int v = 1;
@@ -179,9 +145,7 @@ static int parse_cubie(const char *&p) {
   return v;
 }
 
-/**
- * parse edge to base-6 number
- */
+// parse edge to base-6 number
 static int parse_edge(const char *&p) {
   int c = parse_cubie(p);
   if (c < 6 * 6 || c >= 2 * 6 * 6) return -1;
@@ -190,9 +154,7 @@ static int parse_edge(const char *&p) {
   return c;
 }
 
-/**
- * parse corner to base-6 number
- */
+// parse corner to base-6 number
 static int parse_corner(const char *&p) {
   int c = parse_cubie(p);
   if (c < 6 * 6 * 6 || c >= 2 * 6 * 6 * 6) return -1;
@@ -201,9 +163,7 @@ static int parse_corner(const char *&p) {
   return c;
 }
 
-/**
- * parse cube position from singmaster notation
- */
+// parse cube position from singmaster notation
 const char *cubepos::parse_Singmaster(const char *p) {
   if (strncmp(p, "SING ", 5) == 0) p += 5;
   int m = 0;
@@ -225,9 +185,7 @@ const char *cubepos::parse_Singmaster(const char *p) {
   return 0;
 }
 
-/**
- * given a corner, fill out a face map entity
- */
+// given a corner, fill out a face map entity
 static void parse_corner_to_facemap(const char *p, unsigned char *a) {
   for (int i = 0; i < 3; i++) {
     int f = cubepos::parse_face(p[i]);
@@ -236,17 +194,13 @@ static void parse_corner_to_facemap(const char *p, unsigned char *a) {
   }
 }
 
-/**
- * permutation multiplication for a face map
- */
+// permutation multiplication for a face map
 static void face_map_multiply(unsigned char *a, unsigned char *b,
                               unsigned char *c) {
   for (int i = 0; i < 6; i++) c[i] = b[a[i]];
 }
 
-/**
- * init
- */
+//
 void cubepos::init() {
   static int initialized = 0;
   if (initialized) return;
@@ -386,13 +340,10 @@ void cubepos::init() {
         canon_seq[s][mv] = f + 1 + FACES * isplus;
       }
     }
-    canon_seq_mask_ext[s] = canon_seq_mask[s];
   }
 }
 
-/**
- * show
- */
+// print cube
 void cubepos::show() {
   cout << "\t";
   cout << "corner";
@@ -442,19 +393,14 @@ void cubepos::show() {
   }
 }
 
-/**
- * init identity cube
- */
 cubepos::cubepos(int, int, int) {
   for (int i = 0; i < 8; i++) c[i] = corner_val(i, 0);
   for (int i = 0; i < 12; i++) e[i] = edge_val(i, 0);
   init();
 }
 
-/**
- * perform the move
- * update c and e according to corner_trans and edge_trans
- */
+// perform the move
+// update c and e according to corner_trans and edge_trans
 void cubepos::move(int mov) {
   const unsigned char *p = corner_trans[mov];
   c[0] = p[c[0]];
@@ -480,10 +426,8 @@ void cubepos::move(int mov) {
   e[11] = p[e[11]];
 }
 
-/**
- * invert a move seq
- * by invert every move
- */
+// invert a move seq
+// by invert every move
 moveseq cubepos::invert_sequence(const moveseq &seq) {
   unsigned int len = seq.size();
   moveseq r(len);
@@ -491,18 +435,7 @@ moveseq cubepos::invert_sequence(const moveseq &seq) {
   return r;
 }
 
-/**
- * generate random move sequence
- */
-moveseq cubepos::random_moveseq(int size) {
-  moveseq r;
-  for (int i = -2; i < size; i++) r.push_back(random_move());
-  return r;
-}
-
-/**
- * swap macro
- */
+// swap macro for movepc
 #define ROT2(cc, a, b)       \
   {                          \
     unsigned char t = cc[a]; \
@@ -538,10 +471,8 @@ moveseq cubepos::random_moveseq(int size) {
     c[a] = corner_ori_dec[t];     \
   }
 
-/**
- * a move routine that treats the representation as a slot (position) to cubie
- * map
- */
+// a move routine that treats the representation as
+// a slot (position) to cubie map
 void cubepos::movepc(int mov) {
   switch (mov) {
     // U1
@@ -637,9 +568,7 @@ void cubepos::movepc(int mov) {
   }
 }
 
-/**
- * multiplication routine
- */
+// multiplication routine
 void cubepos::mul(const cubepos &a, const cubepos &b, cubepos &r) {
   for (int i = 0; i < 8; i++) {
     int cc = a.c[i];
@@ -651,19 +580,19 @@ void cubepos::mul(const cubepos &a, const cubepos &b, cubepos &r) {
   }
 }
 
-/**
- * parsing and printing
- */
+// parsing and printing
 void cubepos::skip_whitespace(const char *&p) {
   while (*p && *p <= ' ') p++;
 }
 
+//
 int cubepos::parse_face(const char *&p) {
   int f = parse_face(*p);
   if (f >= 0) p++;
   return f;
 }
 
+//
 int cubepos::parse_face(char f) {
   switch (f) {
     case 'u':
@@ -689,6 +618,7 @@ int cubepos::parse_face(char f) {
   }
 }
 
+//
 int cubepos::parse_move(const char *&p) {
   skip_whitespace(p);
   const char *q = p;
@@ -715,17 +645,20 @@ int cubepos::parse_move(const char *&p) {
   return f * TWISTS + t;
 }
 
+//
 void cubepos::append_move(char *&p, int mv) {
   append_face(p, mv / TWISTS);
   *p++ = "123"[mv % TWISTS];
   *p = 0;
 }
 
+//
 void cubepos::append_moveseq(char *&p, const moveseq &seq) {
   *p = 0;
   for (unsigned int i = 0; i < seq.size(); i++) append_move(p, seq[i]);
 }
 
+//
 moveseq cubepos::parse_moveseq(const char *&p) {
   moveseq r;
   int mv;
@@ -733,16 +666,14 @@ moveseq cubepos::parse_moveseq(const char *&p) {
   return r;
 }
 
+//
 char *cubepos::moveseq_string(const moveseq &seq) {
-  if (seq.size() > 65) error("! can't print a move sequence that long");
   char *p = static_buf;
   append_moveseq(p, seq);
   return static_buf;
 }
 
-/**
- * write a position in singmaster notation
- */
+// write a position in singmaster notation
 char *cubepos::Singmaster_string() const {
   cubepos cp;
   invert_into(cp);
@@ -766,10 +697,8 @@ char *cubepos::Singmaster_string() const {
   return static_buf;
 }
 
-/**
- * remaps a position p according to mpm'
- * passing in the destination by reference
- */
+// remaps a position p according to mpm'
+// passing in the destination by reference
 void cubepos::remap_into(int m, cubepos &dst) const {
   int mprime = invm[m];
   for (int i = 0; i < 8; i++) {
@@ -784,10 +713,8 @@ void cubepos::remap_into(int m, cubepos &dst) const {
   }
 }
 
-/**
- * auxilliary func for canon_into48
- * call routine 48 times and find the least
- */
+// auxilliary func for canon_into48
+// call routine 48 times and find the least
 void cubepos::canon_into48_aux(cubepos &dst) const {
   for (int m = 1; m < M; m++) {
     int mprime = invm[m];
@@ -816,17 +743,13 @@ void cubepos::canon_into48_aux(cubepos &dst) const {
   }
 }
 
-/**
- * calculates the canonical (first, or least) cubepos
- */
+// calculates the canonical (first, or least) cubepos
 void cubepos::canon_into48(cubepos &dst) const {
   dst = *this;
   canon_into48_aux(dst);
 }
 
-/**
- * shuffle cube with parity kept
- */
+// shuffle cube with parity kept
 void cubepos::randomize() {
   int parity = 0;
   for (int i = 0; i < 7; i++) {
@@ -860,9 +783,7 @@ void cubepos::randomize() {
   e[11] ^= s;
 }
 
-/**
- * find the least of the canonicalization of the cubepos and its inverse;
- */
+// find the least of the canonicalization of the cubepos and its inverse;
 void cubepos::canon_into96(cubepos &dst) const {
   cubepos cpi;
   invert_into(cpi);
@@ -873,33 +794,4 @@ void cubepos::canon_into96(cubepos &dst) const {
   }
   canon_into48_aux(dst);
   cpi.canon_into48_aux(dst);
-}
-
-/**
- * output error msg
- */
-void error(const char *s) {
-  cerr << s << endl;
-  if (*s == '!') exit(10);
-}
-
-static double start;
-
-/**
- *
- */
-double walltime() {
-  struct timeval tv;
-  gettimeofday(&tv, 0);
-  return tv.tv_sec + 0.000001 * tv.tv_usec;
-}
-
-/**
- * cal duration from start
- */
-double duration() {
-  double now = walltime();
-  double r = now - start;
-  start = now;
-  return r;
 }
