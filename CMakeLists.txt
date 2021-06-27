@@ -14,7 +14,16 @@ add_executable(
   cubepos_test.cpp
 )
 
+add_executable(
+  pair_search
+  pair_search.cpp
+)
+
 target_link_libraries(
   cubepos_test
+  cube201
+)
+target_link_libraries(
+  pair_search
   cube201
 )

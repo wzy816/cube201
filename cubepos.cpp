@@ -20,6 +20,22 @@ unsigned char cubepos::mod24[2 * CUBIES];
 // i and (not (i+3)%6) define a edge
 char cubepos::faces[FACES] = {'U', 'F', 'R', 'D', 'B', 'L'};
 
+// color scheme
+char const *cubepos::color_schemes[24] = {
+    "🔲🟩🟥🟨🟦🟧", "🔲🟥🟦🟨🟧🟩",
+    "🔲🟦🟧🟨🟩🟥", "🔲🟧🟩🟨🟥🟦",
+    "🟨🟩🟧🔲🟦🟥", "🟨🟧🟦🔲🟥🟩",
+    "🟨🟦🟥🔲🟩🟧", "🟨🟥🟩🔲🟧🟦",
+    "🟥🟩🟨🟧🟦🔲", "🟥🟨🟦🟧🔲🟩",
+    "🟥🟦🔲🟧🟩🟨", "🟥🔲🟩🟧🟨🟦",
+    "🟧🟩🔲🟥🟦🟨", "🟧🔲🟦🟥🟨🟩",
+    "🟧🟦🟨🟥🟩🔲", "🟧🟨🟩🟥🔲🟦",
+    "🟦🟥🟨🟩🟧🔲", "🟦🟨🟧🟩🔲🟥",
+    "🟦🟧🔲🟩🟥🟨", "🟦🔲🟥🟩🟨🟧",
+    "🟩🟥🔲🟦🟧🟨", "🟩🔲🟧🟦🟨🟥",
+    "🟩🟧🟨🟦🟥🔲", "🟩🟨🟥🟦🔲🟧",
+};
+
 // move names
 char const *cubepos::moves[NMOVES] = {"U1", "U2", "U3", "F1", "F2", "F3",
                                       "R1", "R2", "R3", "D1", "D2", "D3",
@@ -344,29 +360,33 @@ void cubepos::init() {
 }
 
 // print cube
-void cubepos::show() {
-  cout << "\t";
-  cout << "corner";
-  for (int i = 0; i < 8; i++) {
-    int cubie_val = (int)(c[i]);
-    int cubie_perm = cubepos::corner_perm(cubie_val);
-    int cubie_ori = cubepos::corner_ori(cubie_val);
-    cout << cubie_val << "[" << cubie_perm << "," << cubie_ori << "]"
-         << " ";
-  }
-  cout << "edge ";
-  for (int i = 0; i < 12; i++) {
-    int cubie_val = (int)(e[i]);
-    int cubie_perm = cubepos::edge_perm(cubie_val);
-    int cubie_ori = cubepos::edge_ori(cubie_val);
-    cout << cubie_val << "[" << cubie_perm << "," << cubie_ori << "]"
-         << " ";
-  }
-  cout << endl;
+void cubepos::show(bool use_color) {
+  // cout << "\t";
+  // cout << "corner";
+  // for (int i = 0; i < 8; i++) {
+  //   int cubie_val = (int)(c[i]);
+  //   int cubie_perm = cubepos::corner_perm(cubie_val);
+  //   int cubie_ori = cubepos::corner_ori(cubie_val);
+  //   cout << cubie_val << "[" << cubie_perm << "," << cubie_ori << "]"
+  //        << " ";
+  // }
+  // cout << "edge ";
+  // for (int i = 0; i < 12; i++) {
+  //   int cubie_val = (int)(e[i]);
+  //   int cubie_perm = cubepos::edge_perm(cubie_val);
+  //   int cubie_ori = cubepos::edge_ori(cubie_val);
+  //   cout << cubie_val << "[" << cubie_perm << "," << cubie_ori << "]"
+  //        << " ";
+  // }
+  // cout << endl;
+
+  // print cube
   char *s = Singmaster_string();
   int size = 67;
   string ss(s, size);
-  cout << "\t" << ss << endl;
+  // cout << "\t" << ss << endl;
+
+  // unfold block to singmaster string index mapping
   char unfold[9][12] = {{-7, -7, -7, 44, 6, 40, -7, -7, -7, -7, -7, -7},
                         {-7, -7, -7, 9, -1, 3, -7, -7, -7, -7, -7, -7},
                         {-7, -7, -7, 48, 0, 36, -7, -7, -7, -7, -7, -7},
@@ -376,26 +396,52 @@ void cubepos::show() {
                         {-7, -7, -7, 56, 12, 52, -7, -7, -7, -7, -7, -7},
                         {-7, -7, -7, 21, -4, 15, -7, -7, -7, -7, -7, -7},
                         {-7, -7, -7, 60, 18, 64, -7, -7, -7, -7, -7, -7}};
+
+  string scheme = color_schemes[color_index];
   for (int i = 0; i < 9; ++i) {
-    cout << "\t";
     for (int j = 0; j < 12; ++j) {
       int index = unfold[i][j];
       if (index == -7) {
-        cout << " ";
-      } else if (index < 0) {
-        cout << cubepos::faces[-index - 1];
+        if (!use_color) {
+          cout << " ";
+        } else {
+          cout << "  ";
+        }
       } else {
-        cout << ss[index];
+        char f;
+        if (index < 0) {
+          f = cubepos::faces[-index - 1];
+        } else {
+          f = ss[index];
+        }
+        if (!use_color) {
+          cout << f << " ";
+        } else {
+          if (f == 'U') {
+            cout << scheme.substr(0, 4);
+          } else if (f == 'F') {
+            cout << scheme.substr(4, 4);
+          } else if (f == 'R') {
+            cout << scheme.substr(8, 4);
+          } else if (f == 'D') {
+            cout << scheme.substr(12, 4);
+          } else if (f == 'B') {
+            cout << scheme.substr(16, 4);
+          } else if (f == 'L') {
+            cout << scheme.substr(20, 4);
+          }
+        }
       }
-      cout << " ";
     }
     cout << endl;
   }
+  cout << endl;
 }
 
 cubepos::cubepos(int, int, int) {
   for (int i = 0; i < 8; i++) c[i] = corner_val(i, 0);
   for (int i = 0; i < 12; i++) e[i] = edge_val(i, 0);
+  set_color(0);
   init();
 }
 

@@ -181,6 +181,10 @@ class cubepos {
   static unsigned char canon_seq[CANONSEQSTATES][NMOVES];
   static int canon_seq_mask[CANONSEQSTATES];
 
+  static char const *color_schemes[24];
+  int color_index;
+  void set_color(int i) { color_index = i; }
+
   // cal next canon state
   static inline int next_cs(int cs, int mv) { return canon_seq[cs][mv]; }
 
@@ -188,7 +192,7 @@ class cubepos {
   static inline int cs_mask(int cs) { return canon_seq_mask[cs]; }
 
   // unfold cube and print
-  void show();
+  void show(bool use_color = true);
 };
 
 #endif
