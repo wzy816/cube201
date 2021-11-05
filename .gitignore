@@ -1,2 +1,6 @@
 build
 CMakeFiles
+.vscode
+Cube*.so
+Cube.cpp
+.DS_Store
