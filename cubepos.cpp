@@ -4,6 +4,7 @@
 
 #include <bitset>
 #include <iostream>
+#include <string.h>
 
 // identity_cube
 // will init all parameters for cubes
@@ -911,7 +912,84 @@ void cubepos::canon_into96(cubepos &dst) const
   canon_into48_aux(dst);
   cpi.canon_into48_aux(dst);
 }
-
+char cubepos::color_letter(const char *color)
+{
+  if (strcmp(color, "🟥") == 0)
+  {
+    return 'R';
+  }
+  else if (strcmp(color, "🟩") == 0)
+  {
+    return 'G';
+  }
+  else if (strcmp(color, "🟨") == 0)
+  {
+    return 'Y';
+  }
+  else if (strcmp(color, "🟧") == 0)
+  {
+    return 'O';
+  }
+  else if (strcmp(color, "🟦") == 0)
+  {
+    return 'B';
+  }
+  else if (strcmp(color, "⬜") == 0)
+  {
+    return 'W';
+  }
+  else
+  {
+    return '-';
+  }
+}
+//
+char *cubepos::pair_unfold(int color)
+{
+  char pair[18] = {50, 1, 37, 27, -2, 24, 57, 13, 54, 42, 7, 45, 30, -5, 33, 65, 19, 62};
+  char *s = cubepos::Singmaster_string();
+  int size = 67;
+  string ss(s, size);
+  char *res = new char[18]();
+  for (int i = 0; i < 18; ++i)
+  {
+    int index = pair[i];
+    char f;
+    if (index < 0)
+    {
+      f = cubepos::faces[-index - 1];
+    }
+    else
+    {
+      f = ss[index];
+    }
+    if (f == 'U')
+    {
+      res[i] = color_letter(color_schemes[color][0]);
+    }
+    else if (f == 'F')
+    {
+      res[i] = color_letter(color_schemes[color][1]);
+    }
+    else if (f == 'R')
+    {
+      res[i] = color_letter(color_schemes[color][2]);
+    }
+    else if (f == 'D')
+    {
+      res[i] = color_letter(color_schemes[color][3]);
+    }
+    else if (f == 'B')
+    {
+      res[i] = color_letter(color_schemes[color][4]);
+    }
+    else if (f == 'L')
+    {
+      res[i] = color_letter(color_schemes[color][5]);
+    }
+  }
+  return res;
+}
 // print unfold cube with color
 void cubepos::color_unfold(int color)
 {
@@ -948,9 +1026,6 @@ void cubepos::color_unfold(int color)
         {
           f = ss[index];
         }
-        // cout << endl
-        //      << f << endl
-        //      << scheme.size() << endl;
         if (f == 'U')
         {
           cout << color_schemes[color][0];
@@ -958,27 +1033,22 @@ void cubepos::color_unfold(int color)
         else if (f == 'F')
         {
           cout << color_schemes[color][1];
-          // cout << scheme.substr(4, 4);
         }
         else if (f == 'R')
         {
           cout << color_schemes[color][2];
-          // cout << scheme.substr(8, 4);
         }
         else if (f == 'D')
         {
           cout << color_schemes[color][3];
-          // cout << scheme.substr(12, 4);
         }
         else if (f == 'B')
         {
           cout << color_schemes[color][4];
-          // cout << scheme.substr(16, 4);
         }
         else if (f == 'L')
         {
           cout << color_schemes[color][5];
-          // cout << scheme.substr(20, 4);
         }
       }
     }

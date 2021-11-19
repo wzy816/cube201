@@ -4,3 +4,4 @@ CMakeFiles
 Cube*.so
 Cube.cpp
 .DS_Store
+data/pair/*
